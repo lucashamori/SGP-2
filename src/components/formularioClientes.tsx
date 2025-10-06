@@ -13,6 +13,9 @@ import {
   SelectValue,
 } from "@/components/ui/select" 
 
+// Importa a Server Action que acabamos de criar
+import { cadastrarCliente } from "@/actions/cliente"
+
 type DocumentType = "cpf" | "cnpj"
 
 export function Formulario({
@@ -21,6 +24,7 @@ export function Formulario({
 }: React.ComponentPropsWithoutRef<"div">) {
   
   const [documentType, setDocumentType] = useState<DocumentType>("cpf")
+  const [loading, setLoading] = useState(false); // Novo estado para controle de loading
   
   // --- INÍCIO DA LÓGICA DE VARIÁVEIS COM IF/ELSE ---
   
@@ -47,30 +51,41 @@ export function Formulario({
     tipoCliente = "Pessoa Jurídica";
   }
   
-  const inputType = "text"; // Esta variável permanece estática
+  const inputType = "text"; 
   
   // --- FIM DA LÓGICA DE VARIÁVEIS COM IF/ELSE ---
 
   const handleDocumentChange = (value: string) => {
-    // Esta função dispara o recálculo das variáveis no próximo render
     setDocumentType(value as DocumentType)
   }
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
+      setLoading(true); // Ativa o loading
       
-      const formData = new FormData(event.currentTarget);
+      const form = event.currentTarget;
+      const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
       
-      // A variável tipoCliente (calculada acima com if/else) é adicionada aqui:
-      const dadosCompletos = {
-          ...data,
-          tipo_cliente: tipoCliente, 
+      const dadosParaEnvio = {
+          nome: data.nome as string,
+          nome_reduzido: data.nome_reduzido as string, // Usando o nome correto do campo
+          cpf_cnpj: data.cpf_cnpj as string, 
+          endereco: data.endereco as string,
+          telefone: data.telefone as string,
+          tipo_cliente: tipoCliente, // "Pessoa Física" ou "Pessoa Jurídica"
       };
+
+      const result = await cadastrarCliente(dadosParaEnvio);
+
+      setLoading(false); // Desativa o loading
       
-      console.log("Dados prontos para envio:", dadosCompletos);
-      
-      // ... (Restante da lógica de envio para o backend)
+      if (result.success) {
+        alert(result.message);
+        form.reset(); // Limpa o formulário após o sucesso
+      } else {
+        alert("Erro no cadastro: " + result.message);
+      }
   };
 
 
@@ -97,10 +112,10 @@ export function Formulario({
 
             {/* Campo Nome reduzido */}
             <div className="grid gap-2">
-              <Label htmlFor="nome">Nome reduzido</Label>
+              <Label htmlFor="nome_reduzido">Nome reduzido</Label>
               <Input
-                id="nome"
-                name="nome"
+                id="nome_reduzido" // ID corrigido
+                name="nome_reduzido" // NAME corrigido
                 type="text"
                 placeholder="Mori"
                 required
@@ -109,7 +124,6 @@ export function Formulario({
             
             {/* CAMPO DE DOCUMENTO (SELECT E INPUT LADO A LADO) */}
             <div className="grid gap-2">
-              {/* Usa a Label calculada com if/else */}
               <Label htmlFor={inputId}>{labelText}</Label> 
               
               <div className="flex gap-2">
@@ -164,8 +178,8 @@ export function Formulario({
               />
             </div>
 
-            <Button type="submit" className="w-full">
-              Cadastrar
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Cadastrando..." : "Cadastrar"}
             </Button>
           </div>
           
