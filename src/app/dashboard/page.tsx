@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/app-sidebar"
+import { AppSidebar } from "@/components/app-sidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -6,47 +6,52 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+} from "@/components/ui/breadcrumb";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
-import { Users, Package, PackageOpen } from "lucide-react"
-import { DataTable } from "@/app/dashboard/data-table"
-import { columns, Payment } from "@/app/dashboard/columns"
+} from "@/components/ui/sidebar";
+import { Users, Package, PackageOpen } from "lucide-react";
+import { DataTable } from "@/app/dashboard/data-table";
+import { columns, ClienteData } from "@/app/dashboard/columns"; // Import corrigido para ClienteData
+import { getClientesData } from "@/lib/data-actions"; // Importa a função para a tabela
+import {
+  getTotalClientes,
+  getValorTotalEstoque,
+} from "@/lib/dashboard-actions"; // Importa as funções para os cards
 
-
-async function getData(): Promise<Payment[]> {
-  // Fetch data from your API here.
-  return [
-    {
-      nome:" Lucas Mori",
-      cpf: 11627467696,
-      telefone: 35992445675,
-      pedidos: 5,
-    },
-    {
-      nome:" Adilson",
-      cpf: 11667766699,
-      telefone: 35992445675,
-      pedidos: 30,
-    },
-    {
-      nome:" Lucas Mori",
-      cpf: 11223344556,
-      telefone: 35992445675,
-      pedidos: 5,
-    },
-    // ... adicione mais dados de exemplo se quiser
-  ]
+// 1. Função de busca de dados para a TABELA
+async function getData(): Promise<ClienteData[]> {
+  // Chamada ao banco de dados REAL!
+  const clientes = await getClientesData();
+  return clientes;
 }
+
+// Função auxiliar para formatar valores monetários em BRL
+const formatCurrency = (value: number) => {
+  return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+};
 
 // CORREÇÃO: A função Page foi marcada como 'async'
 export default async function Page() {
-    const data = await getData()
+  // 2. Busca de todos os dados (tabela e cards) em paralelo para otimizar o carregamento.
+  const [data, totalClientes, valorTotalEstoque] = await Promise.all([
+    getData(), // Tabela de clientes
+    getTotalClientes(), // Card Clientes (Contagem)
+    getValorTotalEstoque(), // Card Produtos (Valor Total)
+  ]);
+  // NOTE: 'data' é o array de clientes para a tabela.
+  // 'totalClientes' é o número total de clientes (ex: 13).
+  // 'valorTotalEstoque' é a soma do valor dos produtos em estoque (ex: 12238.27).
 
   return (
     <SidebarProvider>
@@ -87,7 +92,10 @@ export default async function Page() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-base sm:text-lg font-bold">234 clientes</p>
+                <p className="text-base sm:text-lg font-bold">
+                  {/* VALOR DINÂMICO DO BANCO */}
+                  {totalClientes.toLocaleString("pt-BR")} clientes
+                </p>
               </CardContent>
             </Card>
 
@@ -97,11 +105,10 @@ export default async function Page() {
                   Vendas
                   <PackageOpen className="ml-auto w-4 h-4" />
                 </CardTitle>
-                <CardDescription>
-                  Vendas nos últimos 30 dias.
-                </CardDescription>
+                <CardDescription>Vendas nos últimos 30 dias.</CardDescription>
               </CardHeader>
               <CardContent>
+                {/* Mantive este valor estático, pois não criamos a função de soma de vendas */}
                 <p className="text-base sm:text-lg font-bold">R$ 123.000.00</p>
               </CardContent>
             </Card>
@@ -117,18 +124,20 @@ export default async function Page() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-base sm:text-lg font-bold">R$ 12.238.27</p>
+                <p className="text-base sm:text-lg font-bold">
+                  {/* VALOR DINÂMICO DO BANCO */}
+                  {formatCurrency(valorTotalEstoque)}
+                </p>
               </CardContent>
             </Card>
-
           </div>
-          {/* Ocultado o div com min-h-[100vh] para que a tabela seja visível abaixo */}
-          {/* <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" /> */}
-          <div className="container mx-auto py-10">
+
+          {/* Tabela (logo abaixo dos cards) */}
+          <div className="container mx-auto py-4 px-0">
             <DataTable columns={columns} data={data} />
           </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

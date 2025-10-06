@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -12,4 +6,147 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model cliente {
+  id_cliente BigInt
+
+  // CORREÇÃO 1: Renomeando o campo de dados 'tipo_cliente' para evitar conflito com o relacionamento abaixo
+  tipoClienteIdFK BigInt @map("tipo_cliente") 
+  
+  cpf_cnpj BigInt
+  nome String @db.VarChar(45)
+  nome_reduzido String? @db.VarChar(45)
+  endereco String @db.VarChar(255)
+  
+  // CORREÇÃO 2: Mantendo o campo 'telefone' no código, mas mapeando para 'tefelone' no DB
+  telefone BigInt @map("tefelone") 
+  
+  empresa_id_empresa BigInt
+  tipo_cliente_id_tipo_cliente BigInt
+  Usuario_Inclusao String @default("SYSTEM") @db.VarChar(100)
+  Data_Hora_Inclusao DateTime @default(now()) @db.DateTime(0)
+  Usuario_Alteracao String? @db.VarChar(100)
+  Data_Hora_Alteracao DateTime? @db.DateTime(0)
+  
+  empresa empresa @relation(fields: [empresa_id_empresa], references: [id_empresa], onDelete: NoAction, onUpdate: NoAction, map: "fk_cliente_empresa")
+  tipo_cliente tipo_cliente @relation(fields: [tipo_cliente_id_tipo_cliente], references: [id_tipo_cliente], onDelete: NoAction, onUpdate: NoAction, map: "fk_cliente_tipo_cliente1")
+  pedido pedido[]
+
+  @@id([id_cliente, empresa_id_empresa, tipo_cliente_id_tipo_cliente])
+  @@index([empresa_id_empresa], map: "fk_cliente_empresa_idx")
+  @@index([tipo_cliente_id_tipo_cliente], map: "fk_cliente_tipo_cliente1_idx")
+}
+
+model empresa {
+  id_empresa BigInt @id
+  cnpj BigInt
+  razao_social String @db.VarChar(45)
+  nome_fantasia String? @db.VarChar(45)
+  endereco String @db.VarChar(45)
+  matriz_filial Int? @db.TinyInt
+  Usuario_Inclusao String @default("SYSTEM") @db.VarChar(100)
+  Data_Hora_Inclusao DateTime @default(now()) @db.DateTime(0)
+  Usuario_Alteracao String? @db.VarChar(100)
+  Data_Hora_Alteracao DateTime? @db.DateTime(0)
+  cliente cliente[]
+  pedido pedido[]
+}
+
+model estoque {
+  id_estoque BigInt
+  qtd_produto Decimal @db.Decimal(10, 0)
+  qtd_reservada Decimal @db.Decimal(10, 0)
+  produto_id_produto BigInt
+  produto_unidade_medida_id_unidade_medida BigInt
+  Usuario_Inclusao String @default("SYSTEM") @db.VarChar(100)
+  Data_Hora_Inclusao DateTime @default(now()) @db.DateTime(0)
+  Usuario_Alteracao String? @db.VarChar(100)
+  Data_Hora_Alteracao DateTime? @db.DateTime(0)
+  produto produto @relation(fields: [produto_id_produto, produto_unidade_medida_id_unidade_medida], references: [id_produto, unidade_medida_id_unidade_medida], onDelete: NoAction, onUpdate: NoAction, map: "fk_estoque_produto1")
+
+  @@id([id_estoque, produto_id_produto, produto_unidade_medida_id_unidade_medida])
+  @@index([produto_id_produto, produto_unidade_medida_id_unidade_medida], map: "fk_estoque_produto1_idx")
+}
+
+model leads {
+  id_lead BigInt @id
+  cpf_lead BigInt
+  nome_lead String @db.VarChar(45)
+  endereco String? @db.VarChar(255)
+  telefone BigInt?
+  id_empresa BigInt
+}
+
+model pedido {
+  id_pedido BigInt
+  qtd_comprada_item Decimal @db.Decimal(10, 2)
+  valor_total_item Decimal @db.Decimal(10, 2)
+  produto_id_produto BigInt
+  produto_unidade_medida_id_unidade_medida BigInt
+  cliente_id_cliente BigInt
+  cliente_empresa_id_empresa BigInt
+  cliente_tipo_cliente_id_tipo_cliente BigInt
+  empresa_id_empresa BigInt
+  numero_pedido BigInt
+  data_pedido DateTime @db.Date
+  Usuario_Inclusao String @default("SYSTEM") @db.VarChar(100)
+  Data_Hora_Inclusao DateTime @default(now()) @db.DateTime(0)
+  Usuario_Alteracao String? @db.VarChar(100)
+  Data_Hora_Alteracao DateTime? @db.DateTime(0)
+  
+  cliente cliente @relation(fields: [cliente_id_cliente, cliente_empresa_id_empresa, cliente_tipo_cliente_id_tipo_cliente], references: [id_cliente, empresa_id_empresa, tipo_cliente_id_tipo_cliente], onDelete: NoAction, onUpdate: NoAction, map: "fk_pedido_cliente1")
+  empresa empresa @relation(fields: [empresa_id_empresa], references: [id_empresa], onDelete: NoAction, onUpdate: NoAction, map: "fk_pedido_empresa1")
+  produto produto @relation(fields: [produto_id_produto, produto_unidade_medida_id_unidade_medida], references: [id_produto, unidade_medida_id_unidade_medida], onDelete: NoAction, onUpdate: NoAction, map: "fk_pedido_produto1")
+
+  @@id([id_pedido, produto_id_produto, produto_unidade_medida_id_unidade_medida, cliente_id_cliente, cliente_empresa_id_empresa, cliente_tipo_cliente_id_tipo_cliente, empresa_id_empresa])
+  @@index([cliente_id_cliente, cliente_empresa_id_empresa, cliente_tipo_cliente_id_tipo_cliente], map: "fk_pedido_cliente1_idx")
+  @@index([empresa_id_empresa], map: "fk_pedido_empresa1_idx")
+  @@index([produto_id_produto, produto_unidade_medida_id_unidade_medida], map: "fk_pedido_produto1_idx")
+}
+
+model produto {
+  id_produto BigInt
+  descricao String @db.VarChar(45)
+  
+  // CORREÇÃO 3: Renomeando o campo de dados 'unidade_medida' para evitar conflito com o relacionamento
+  unidadeMedidaIdFK BigInt @map("unidade_medida") 
+  
+  valor_unitario Decimal @db.Decimal(10, 2)
+  unidade_medida_id_unidade_medida BigInt
+  Usuario_Inclusao String @default("SYSTEM") @db.VarChar(100)
+  Data_Hora_Inclusao DateTime @default(now()) @db.DateTime(0)
+  Usuario_Alteracao String? @db.VarChar(100)
+  Data_Hora_Alteracao DateTime? @db.DateTime(0)
+  
+  estoque estoque[]
+  pedido pedido[]
+  unidade_medida unidade_medida @relation(fields: [unidade_medida_id_unidade_medida], references: [id_unidade_medida], onDelete: NoAction, onUpdate: NoAction, map: "fk_produto_unidade_medida1")
+
+  @@id([id_produto, unidade_medida_id_unidade_medida])
+  @@index([unidade_medida_id_unidade_medida], map: "fk_produto_unidade_medida1_idx")
+}
+
+model tipo_cliente {
+  id_tipo_cliente BigInt @id
+  tipo_cliente String @db.VarChar(45)
+  ativo Int @db.TinyInt
+  Usuario_Inclusao String @default("SYSTEM") @db.VarChar(100)
+  Data_Hora_Inclusao DateTime @default(now()) @db.DateTime(0)
+  Usuario_Alteracao String? @db.VarChar(100)
+  Data_Hora_Alteracao DateTime? @db.DateTime(0)
+  cliente cliente[]
+}
+
+model unidade_medida {
+  id_unidade_medida BigInt @id
+  descricao String @db.VarChar(45)
+  ativo Int @db.TinyInt
+  descricao_reduzida String? @db.VarChar(30)
+  Usuario_Inclusao String @default("SYSTEM") @db.VarChar(100)
+  Data_Hora_Inclusao DateTime @default(now()) @db.DateTime(0)
+  Usuario_Alteracao String? @db.VarChar(100)
+  Data_Hora_Alteracao DateTime? @db.DateTime(0)
+  produto produto[]
 }
