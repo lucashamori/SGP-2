@@ -162,7 +162,7 @@ export function Formulario({
                 id="endereco"
                 name="endereco"
                 type="text"
-                placeholder="Alameda Zurique 393"
+                placeholder="Alameda Zurique 32"
                 required
               />
 
