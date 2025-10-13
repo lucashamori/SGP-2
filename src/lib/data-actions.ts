@@ -1,47 +1,48 @@
-// src/lib/data-actions.ts
 "use server"
 
-import { prisma } from "@/lib/prisma" // Assumindo que você criou o arquivo src/lib/prisma.ts
+import { prisma } from "@/lib/prisma"
 
-// NOTE: O Prisma gera tipos com base no seu schema.prisma. 
-// O tipo 'cliente' gerado pelo Prisma tem campos BigInt e o campo mapeado 'telefone'.
+// Mapeamento reverso para converter o ID do tipo de cliente de volta para texto
+const CLIENTE_TYPE_TEXT_MAP: { [key: number]: string } = {
+  10001: "Pessoa Física",
+  10002: "Pessoa Jurídica",
+}
 
 export async function getClientesData() {
-  try {
-    // Busca todos os clientes e inclui a relação 'pedido' para contar o total de pedidos por cliente.
-    const clientes = await prisma.cliente.findMany({
-      select: {
-        nome: true,
-        cpf_cnpj: true, // É um BigInt
-        telefone: true, // É um BigInt (mapeado de 'tefelone')
-        pedido: { // Relacionamento com a tabela 'pedido'
-          select: {
-            id_pedido: true,
-          },
-        },
-      },
-      // Adicione um limite ou ordenação se o volume de dados for grande
-      orderBy: {
-        nome: 'asc',
-      }
-    });
+  try {
+    const clientes = await prisma.cliente.findMany({
+      select: {
+        // Chaves primárias/estrangeiras necessárias para as ações
+        id_cliente: true,
+        empresa_id_empresa: true,
+        tipo_cliente_id_tipo_cliente: true,
 
-    // Mapeamento e Formatação dos dados para o frontend
-    return clientes.map(cliente => ({
-      nome: cliente.nome,
-      
-      // Converte BigInt para string para exibição na tabela.
-      // Isso é NECESSÁRIO porque o React (frontend) não lida bem com BigInts no estado ou props.
-      cpf_cnpj: cliente.cpf_cnpj.toString(), 
-      telefone: cliente.telefone.toString(),
-      
-      // Conta quantos pedidos existem para o cliente
-      totalPedidos: cliente.pedido.length,
-    }));
+        // Dados para exibição e para o formulário de edição
+        nome: true,
+        nome_reduzido: true,
+        cpf_cnpj: true, 
+        endereco: true,
+        telefone: true, 
+        pedido: { select: { id_pedido: true } },
+      },
+      orderBy: { nome: 'asc' }
+    });
 
+    // Converte todos os BigInts para string para segurança no frontend
+    return clientes.map(cliente => ({
+      id_cliente: cliente.id_cliente.toString(),
+      empresa_id_empresa: cliente.empresa_id_empresa.toString(),
+      nome: cliente.nome,
+      nome_reduzido: cliente.nome_reduzido,
+      cpf_cnpj: cliente.cpf_cnpj.toString(),
+      telefone: cliente.telefone.toString(),
+      endereco: cliente.endereco,
+      // Converte o ID do tipo de cliente para o texto correspondente
+      tipo_cliente: CLIENTE_TYPE_TEXT_MAP[Number(cliente.tipo_cliente_id_tipo_cliente)] || "Indefinido",
+      totalPedidos: cliente.pedido.length,
+    }));
   } catch (error) {
     console.error("ERRO AO BUSCAR DADOS DE CLIENTES:", error);
-    // Em caso de erro, retorna um array vazio
     return [];
   }
 }

@@ -64,7 +64,7 @@ const data = {
         },
         {
           title: "Exibir Clientes",
-          url: "cadastroClientes",
+          url: "exibirClientes",
         },
       ],
     },

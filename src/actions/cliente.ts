@@ -1,75 +1,187 @@
-"use server"
+// ./src/actions/cliente.ts  (trechos atualizados: updateCliente e cadastrarCliente)
+"use server";
 
-import { prisma } from "@/lib/prisma" 
+import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
 
-// Mapeamento dos IDs da tabela sgp.tipo_cliente (sgp_tipo_cliente.sql)
-// Pessoa Física = 10001 | Pessoa Jurídica = 10002
-const CLIENTE_TYPE_ID_MAP = {
+const CLIENTE_TYPE_ID_MAP: Record<string, number> = {
   "Pessoa Física": 10001,
   "Pessoa Jurídica": 10002,
-}
+};
 
-// Assumindo um ID de empresa padrão para desenvolvimento, pois o campo é NOT NULL
-const EMPRESA_PADRAO_ID = 10001; 
+const EMPRESA_PADRAO_ID = 10001;
 
 type CadastroData = {
   nome: string;
-  nome_reduzido?: string; // Campo opcional
-  cpf_cnpj: string; 
+  nome_reduzido?: string;
+  cpf_cnpj: string;
   endereco: string;
-  telefone: string; 
+  telefone: string;
   tipo_cliente: "Pessoa Física" | "Pessoa Jurídica";
+};
+
+type UpdateData = {
+  nome: string;
+  nome_reduzido?: string;
+  cpf_cnpj: string;
+  endereco: string;
+  telefone: string;
+  tipo_cliente: "Pessoa Física" | "Pessoa Jurídica";
+};
+
+/** Helper: limpa e retorna só dígitos */
+function somenteDigitos(input: string): string {
+  return String(input ?? "").replace(/\D/g, "");
 }
 
-export async function cadastrarCliente(data: CadastroData) {
-  
-  // 1. CONVERSÃO DE TIPOS E VALIDAÇÃO BÁSICA
+/**
+ * Atualiza um cliente com validação de comprimento do CPF/CNPJ:
+ * - Pessoa Física => 11 dígitos
+ * - Pessoa Jurídica => 14 dígitos
+ */
+export async function updateCliente(
+  identifiers: {
+    id_cliente: string | number;
+    empresa_id_empresa: string | number;
+    tipo_cliente_id_tipo_cliente?: string | number;
+  },
+  data: UpdateData
+) {
+  console.log("[AÇÃO NO SERVIDOR] Recebido para ATUALIZAR:", { identifiers, data });
+
+  // Valida tipo_cliente
+  const tipoClienteId = CLIENTE_TYPE_ID_MAP[data.tipo_cliente];
+  if (!tipoClienteId) return { success: false, message: "Tipo de cliente inválido." };
+
+  // Limpa CPF/CNPJ e telefone (somente dígitos)
+  const cpfRaw = somenteDigitos(data.cpf_cnpj);
+  const telefoneRaw = somenteDigitos(data.telefone);
+
+  // Validação de tamanho específica
+  if (data.tipo_cliente === "Pessoa Física") {
+    if (cpfRaw.length !== 11) {
+      return { success: false, message: "CPF inválido: deve conter exatamente 11 dígitos." };
+    }
+  } else {
+    // Pessoa Jurídica
+    if (cpfRaw.length !== 14) {
+      return { success: false, message: "CNPJ inválido: deve conter exatamente 14 dígitos." };
+    }
+  }
+
+  // Converte para BigInt com segurança (aqui já sabemos que só tem dígitos)
   let cpfCnpjBigInt: bigint;
   let telefoneBigInt: bigint;
-
   try {
-    // Campos BigInt devem ser convertidos explicitamente
-    cpfCnpjBigInt = BigInt(data.cpf_cnpj.replace(/[.-]/g, '')); // Remove pontos/traços se existirem
-    telefoneBigInt = BigInt(data.telefone.replace(/[()-\s]/g, ''));
+    cpfCnpjBigInt = BigInt(cpfRaw);
+    telefoneBigInt = telefoneRaw ? BigInt(telefoneRaw) : BigInt(0);
   } catch (e) {
     return { success: false, message: "CPF/CNPJ ou Telefone inválido. Utilize apenas números." };
   }
-  
-  // 2. OBTÉM OS IDs DA CHAVE ESTRANGEIRA (FK)
-  const tipoClienteId = CLIENTE_TYPE_ID_MAP[data.tipo_cliente];
-  if (!tipoClienteId) {
-    return { success: false, message: "Tipo de cliente inválido." };
+
+  // converte identifiers para BigInt (interno)
+  let id_cliente: bigint;
+  let empresa_id_empresa: bigint;
+  let tipo_cliente_id_tipo_cliente: bigint | undefined;
+  try {
+    id_cliente = BigInt(String(identifiers.id_cliente));
+    empresa_id_empresa = BigInt(String(identifiers.empresa_id_empresa));
+    if (identifiers.tipo_cliente_id_tipo_cliente !== undefined) {
+      tipo_cliente_id_tipo_cliente = BigInt(String(identifiers.tipo_cliente_id_tipo_cliente));
+    }
+  } catch (e) {
+    return { success: false, message: "Identificadores inválidos." };
   }
 
   try {
-    // Para PKs compostas, o ID precisa ser fornecido. Usamos Date.now() + um random para simular um ID único.
+    const whereClause: any = {
+      id_cliente,
+      empresa_id_empresa,
+    };
+    if (tipo_cliente_id_tipo_cliente !== undefined) {
+      whereClause.tipo_cliente_id_tipo_cliente = tipo_cliente_id_tipo_cliente;
+    }
+
+    const result = await prisma.cliente.updateMany({
+      where: whereClause,
+      data: {
+        nome: data.nome,
+        nome_reduzido: data.nome_reduzido || data.nome,
+        cpf_cnpj: cpfCnpjBigInt,
+        endereco: data.endereco,
+        telefone: telefoneBigInt,
+        tipo_cliente_id_tipo_cliente: BigInt(tipoClienteId),
+      },
+    });
+
+    if (result.count === 0) {
+      return { success: false, message: "Registro não encontrado para atualizar." };
+    }
+
+    revalidatePath("/exibirClientes");
+    return { success: true, message: "Cliente atualizado com sucesso!" };
+  } catch (error: any) {
+    console.error("ERRO DETALHADO DO PRISMA (ATUALIZAR):", error);
+    if (error?.code === "P2025") {
+      return { success: false, message: "Registro não encontrado para atualizar." };
+    }
+    return { success: false, message: "Erro na base de dados ao atualizar." };
+  }
+}
+
+/**
+ * Cadastrar cliente (mesma validação CPF/CNPJ aplicada)
+ */
+export async function cadastrarCliente(data: CadastroData) {
+  console.log("[AÇÃO NO SERVIDOR] Recebido para CADASTRAR:", data);
+
+  const tipoClienteId = CLIENTE_TYPE_ID_MAP[data.tipo_cliente];
+  if (!tipoClienteId) return { success: false, message: "Tipo de cliente inválido." };
+
+  const cpfRaw = somenteDigitos(data.cpf_cnpj);
+  const telefoneRaw = somenteDigitos(data.telefone);
+
+  if (data.tipo_cliente === "Pessoa Física") {
+    if (cpfRaw.length !== 11) {
+      return { success: false, message: "CPF inválido: deve conter exatamente 11 dígitos." };
+    }
+  } else {
+    if (cpfRaw.length !== 14) {
+      return { success: false, message: "CNPJ inválido: deve conter exatamente 14 dígitos." };
+    }
+  }
+
+  let cpfCnpjBigInt: bigint;
+  let telefoneBigInt: bigint;
+  try {
+    cpfCnpjBigInt = BigInt(cpfRaw);
+    telefoneBigInt = telefoneRaw ? BigInt(telefoneRaw) : BigInt(0);
+  } catch (e) {
+    return { success: false, message: "CPF/CNPJ ou Telefone inválido. Utilize apenas números." };
+  }
+
+  try {
     const newId = BigInt(Date.now());
 
     await prisma.cliente.create({
       data: {
-        // CHAVES PRIMÁRIAS/ESTRANGEIRAS (BIGINT)
-        id_cliente: newId, 
+        id_cliente: newId,
         empresa_id_empresa: BigInt(EMPRESA_PADRAO_ID),
         tipo_cliente_id_tipo_cliente: BigInt(tipoClienteId),
 
-        // CAMPOS DE DADOS
         nome: data.nome,
-        nome_reduzido: data.nome_reduzido || data.nome, // Usa nome completo como fallback
-        cpf_cnpj: cpfCnpjBigInt, 
+        nome_reduzido: data.nome_reduzido || data.nome,
+        cpf_cnpj: cpfCnpjBigInt,
         endereco: data.endereco,
-        telefone: telefoneBigInt, // Mapeado para 'tefelone' no DB
-
-        // Campo de dados 'tipo_cliente' que existe na sua tabela (tipoClienteIdFK no schema.prisma)
-        tipoClienteIdFK: BigInt(tipoClienteId), 
-
-        // Os campos de auditoria (Usuario_Inclusao, Data_Hora_Inclusao) usam @default do Prisma
+        telefone: telefoneBigInt,
+        tipoClienteIdFK: BigInt(tipoClienteId),
       },
     });
 
+    revalidatePath("/exibirClientes");
     return { success: true, message: "Cliente cadastrado com sucesso!" };
-
-  } catch (error) {
-    console.error("ERRO NO BANCO DE DADOS:", error);
+  } catch (error: any) {
+    console.error("ERRO NO BANCO DE DADOS (CADASTRAR):", error);
     return { success: false, message: "Erro na base de dados. Verifique logs do servidor." };
   }
 }
