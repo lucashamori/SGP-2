@@ -1,4 +1,4 @@
-// ./src/actions/cliente.ts  (trechos atualizados: updateCliente e cadastrarCliente)
+// ./src/actions/cliente.ts
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -102,7 +102,7 @@ export async function updateCliente(
       whereClause.tipo_cliente_id_tipo_cliente = tipo_cliente_id_tipo_cliente;
     }
 
-    const result = await prisma.cliente.updateMany({
+    const updateResult = await prisma.cliente.updateMany({
       where: whereClause,
       data: {
         nome: data.nome,
@@ -114,7 +114,7 @@ export async function updateCliente(
       },
     });
 
-    if (result.count === 0) {
+    if (updateResult.count === 0) {
       return { success: false, message: "Registro não encontrado para atualizar." };
     }
 
@@ -126,6 +126,61 @@ export async function updateCliente(
       return { success: false, message: "Registro não encontrado para atualizar." };
     }
     return { success: false, message: "Erro na base de dados ao atualizar." };
+  }
+}
+
+/**
+ * Exclui um cliente.
+ * identifiers: deve receber ids serializáveis (string | number).
+ * Para exclusão precisa indicar ao menos id_cliente e empresa_id_empresa; idealmente inclua tipo_cliente_id_tipo_cliente.
+ */
+export async function deleteCliente(
+  identifiers: { id_cliente: string | number; empresa_id_empresa: string | number; tipo_cliente_id_tipo_cliente?: string | number }
+) {
+  console.log("[AÇÃO NO SERVIDOR] Recebido para DELETAR:", identifiers);
+
+  let id_cliente: bigint;
+  let empresa_id_empresa: bigint;
+  let tipo_cliente_id_tipo_cliente: bigint | undefined;
+
+  try {
+    id_cliente = BigInt(String(identifiers.id_cliente));
+    empresa_id_empresa = BigInt(String(identifiers.empresa_id_empresa));
+    if (identifiers.tipo_cliente_id_tipo_cliente !== undefined) {
+      tipo_cliente_id_tipo_cliente = BigInt(String(identifiers.tipo_cliente_id_tipo_cliente));
+    }
+  } catch (e) {
+    return { success: false, message: "Identificadores inválidos." };
+  }
+
+  try {
+    const whereClause: any = {
+      id_cliente,
+      empresa_id_empresa,
+    };
+    if (tipo_cliente_id_tipo_cliente !== undefined) {
+      whereClause.tipo_cliente_id_tipo_cliente = tipo_cliente_id_tipo_cliente;
+    }
+
+    const deleteResult = await prisma.cliente.deleteMany({
+      where: whereClause,
+    });
+
+    if (deleteResult.count === 0) {
+      return { success: false, message: "Registro não encontrado para excluir." };
+    }
+
+    revalidatePath("/exibirClientes");
+    return { success: true, message: "Cliente excluído com sucesso." };
+  } catch (error: any) {
+    console.error("ERRO DETALHADO DO PRISMA (DELETAR):", error);
+    if (error?.code === "P2003") {
+      return { success: false, message: "Não foi possível excluir: há registros dependentes (restrição de integridade)." };
+    }
+    if (error?.code === "P2025") {
+      return { success: false, message: "Registro não encontrado para excluir." };
+    }
+    return { success: false, message: "Erro na base de dados ao excluir." };
   }
 }
 
