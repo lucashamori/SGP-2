@@ -80,7 +80,7 @@ export function CellActions({ cliente }: { cliente: ClienteData }) {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Editar Cliente: {cliente.nome}</DialogTitle>
+            <DialogTitle> {cliente.nome}</DialogTitle>
           </DialogHeader>
           <ClienteEditForm
             cliente={cliente}

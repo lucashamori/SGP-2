@@ -70,56 +70,32 @@ const data = {
     },
 
     {
-      title: "Empresas",
+      title: "Produtos",
       url: "#",
-      icon: Factory,
+      icon: Package,
       isActive: true,
       items: [
         {
-          title: "Cadastrar Empresas",
-          url: "#",
+          title: "Cadastrar Produtos",
+          url: "cadastroProdutos",
         },
         {
-          title: "Exibir Empresas",
-          url: "cadastroEmpresas",
+          title: "Exibir Estoque",
+          url: "#",
         },
         
       ],
     },
     {
-      title: "Produtos",
+      title: "Empresas",
       url: "#",
       icon: Package,
       items: [
         {
-          title: "Produtos",
+          title: "Empresas",
           url: "vendas",
         },
         
-      ],
-    },
-    
-    {
-      title: "Configurações",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
       ],
     },
   ],

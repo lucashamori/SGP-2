@@ -1,3 +1,6 @@
+import { Formulario, FormularioProduto } from "@/components/formularioProdutos"
+
+
 import { AppSidebar } from "@/components/app-sidebar"
 import {
   Breadcrumb,
@@ -7,16 +10,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { DollarSign, House, Users } from "lucide-react"
 
-export default function Home() {
+export default function CadastrarProdutos() {
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -32,23 +33,24 @@ export default function Home() {
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink href="dashboard">
-                    Léo Conexões Imobiliárias
+                    Sistema de Gerenciamento de Pedidos
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Vendas</BreadcrumbPage>
+                  <BreadcrumbPage>Cadastrar produtos</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-            Vendas!
-          </h1>
+        <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
+            <div className="w-full max-w-sm">
+                <FormularioProduto />
+            </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
-}
+      )
+    }
+    
