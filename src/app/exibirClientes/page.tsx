@@ -83,7 +83,7 @@ export default async function Page() {
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0 container mx-auto max-w-10xl">
          
 
-        <div className="rounded-lg border shadow-sm">
+        <div className="rounded-lg shadow-lg">
             <DataTable 
               columns={columns} 
               data={data} 
