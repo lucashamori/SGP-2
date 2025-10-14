@@ -84,10 +84,10 @@ export const columns: ColumnDef<ClienteData>[] = [
   {
     accessorKey: "totalPedidos",
     header: () => (
-      <div className="text-right font-semibold">Total de Pedidos</div>
+      <div className="text-left font-semibold">Total de Pedidos</div>
     ),
     cell: ({ row }) => (
-      <div className="text-right">
+      <div className="text-center">
         {row.original.totalPedidos ?? 0}
       </div>
     ),

@@ -110,10 +110,10 @@ export function CellActions({ cliente }: { cliente: ClienteData }) {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
                 onClick={handleDelete}
-                className="text-red-600 hover:text-red-700"
+                className="font-semibold"
                 disabled={isPending}
               >
                 <Trash2 className="h-4 w-4" />
