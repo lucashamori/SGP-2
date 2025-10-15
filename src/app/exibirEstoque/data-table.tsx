@@ -5,7 +5,6 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-  Row, // Import Row
 } from "@tanstack/react-table"
 
 import {
@@ -20,13 +19,11 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
-  rowIdKey?: keyof TData;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  rowIdKey,
 }: DataTableProps<TData, TValue>) {
   // Safeguard: Verifica se há dados ou colunas antes de inicializar a tabela
   if (!columns || !data) {
@@ -42,7 +39,6 @@ export function DataTable<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     // Lógica para obter o ID da linha, se a chave for fornecida
-    getRowId: rowIdKey ? (row: TData) => (row as any)[rowIdKey] : undefined,
   })
 
   return (

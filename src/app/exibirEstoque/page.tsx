@@ -13,10 +13,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { DataTable } from "./data-table"; // Usando a cópia local
-import { columns, EstoqueData } from "./columns";
+import { DataTable } from "@/app/exibirEstoque/data-table"; // Usando a cópia local
+import { columns, EstoqueData } from "@/app/exibirEstoque/columns";
 import { getEstoqueFlat } from "@/actions/estoque";
 
 // 1. Função de busca de dados para a TABELA de estoque
@@ -56,26 +54,17 @@ export default async function Page() {
             </Breadcrumb>
           </div>
         </header>
-
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-            {/* Cabeçalho do Conteúdo com Título e Botão de Ação */}
-            <div className="flex items-center justify-between">
-                <h1 className="text-lg font-semibold md:text-2xl">Estoque de Produtos</h1>
-                {/* Botão para adicionar novo item ao estoque/produto */}
-                <Link href="/cadastrarProduto">
-                    <Button>Adicionar Produto</Button>
-                </Link>
-            </div>
-
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0 container mx-auto max-w-10xl">
+           
             {/* Tabela de Dados */}
-            <div className="rounded-lg border shadow-sm">
+            <div className="rounded-lg shadow-lg">
                 <DataTable 
                 columns={columns} 
                 data={data} 
                 rowIdKey="id_estoque" // Chave primária do estoque
                 />
             </div>
-        </main>
+            </div>
 
       </SidebarInset>
     </SidebarProvider>

@@ -20,7 +20,6 @@ export const columns: ColumnDef<EstoqueData>[] = [
     accessorKey: "produto_descricao",
     header: () => <div className="text-left font-semibold">Produto</div>,
     cell: ({ row }) => (
-      // CORREÇÃO: Removido font-medium para seguir o padrão
       <div className="text-left">{row.original.produto_descricao}</div>
     ),
   },
@@ -29,8 +28,7 @@ export const columns: ColumnDef<EstoqueData>[] = [
     // CORREÇÃO: Alinhamento do header para a esquerda para consistência
     header: () => <div className="text-left font-semibold">Qtd. em Estoque</div>,
     cell: ({ row }) => (
-      // Mantido o centro para dados numéricos, como na tabela de clientes
-      <div className="text-center">{row.original.qtd_produto}</div>
+      <div className="text-left">{row.original.qtd_produto}</div>
     ),
   },
   {
@@ -39,7 +37,7 @@ export const columns: ColumnDef<EstoqueData>[] = [
     header: () => <div className="text-left font-semibold">Qtd. Reservada</div>,
     cell: ({ row }) => (
       // Mantido o centro para dados numéricos
-      <div className="text-center">{row.original.qtd_reservada}</div>
+      <div className="text-left">{row.original.qtd_reservada}</div>
     ),
   },
   {
