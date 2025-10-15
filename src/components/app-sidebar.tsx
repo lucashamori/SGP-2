@@ -81,7 +81,7 @@ const data = {
         },
         {
           title: "Exibir Estoque",
-          url: "#",
+          url: "exibirEstoque",
         },
         
       ],
