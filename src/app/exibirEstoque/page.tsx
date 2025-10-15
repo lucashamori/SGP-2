@@ -21,7 +21,7 @@ import { getEstoqueFlat } from "@/actions/estoque";
 async function getData(): Promise<EstoqueData[]> {
   const result = await getEstoqueFlat();
   // A action retorna um objeto { success, data }, então pegamos o array de dados
-  return result.data || [];
+  return result.data;
 }
 
 export default async function Page() {

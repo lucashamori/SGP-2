@@ -25,7 +25,6 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  // Safeguard: Verifica se há dados ou colunas antes de inicializar a tabela
   if (!columns || !data) {
     return (
       <div className="text-center p-4 text-muted-foreground">
@@ -38,7 +37,6 @@ export function DataTable<TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    // Lógica para obter o ID da linha, se a chave for fornecida
   })
 
   return (
@@ -46,10 +44,10 @@ export function DataTable<TData, TValue>({
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
+            <TableRow key={headerGroup.id} className="h-12"> {/* altura do header */}
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id}> {/* padding do header */}
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -62,15 +60,18 @@ export function DataTable<TData, TValue>({
             </TableRow>
           ))}
         </TableHeader>
+
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                className="h-12" /* força altura consistente para cada linha */
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id}> {/* padding consistente */}
+                    {/* Se a célula renderiza um wrapper (div/span), ele ficará dentro do td. */}
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -78,7 +79,7 @@ export function DataTable<TData, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell colSpan={columns.length} className="h-12 text-center">
                 Nenhum resultado encontrado.
               </TableCell>
             </TableRow>
