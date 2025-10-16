@@ -1,11 +1,16 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { ArrowUpDown } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CellActions } from "@/components/cliente-actions-cell";
 
 export type ClienteData = {
   id_cliente: string;
   empresa_id_empresa: string;
+  tipo_cliente_id_tipo_cliente: string;
   nome: string;
   nome_reduzido: string;
   cpf_cnpj: string;
@@ -15,86 +20,115 @@ export type ClienteData = {
   totalPedidos: number;
 };
 
-// Função utilitária para formatar CPF ou CNPJ
+// Funções utilitárias mantidas para formatação
 function formatarCpfCnpj(value: string): string {
   const digits = value.replace(/\D/g, "");
   if (digits.length === 11) {
-    // CPF: 000.000.000-00
     return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
   } else if (digits.length === 14) {
-    // CNPJ: 00.000.000/0000-00
     return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
   }
   return value;
 }
 
-// Função utilitária para formatar telefone
 function formatarTelefone(value: string): string {
   const digits = value.replace(/\D/g, "");
   if (digits.length === 11) {
-    // (XX) XXXXX-XXXX
     return digits.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
   } else if (digits.length === 10) {
-    // (XX) XXXX-XXXX
     return digits.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
   }
   return value;
 }
 
 export const columns: ColumnDef<ClienteData>[] = [
+  // Coluna de Seleção
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Selecionar tudo"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Selecionar linha"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  // Coluna Nome (com ordenação)
   {
     accessorKey: "nome",
-    header: () => <div className="text-left font-semibold">Nome</div>,
-    cell: ({ row }) => (
-      <div className="text-left">{row.original.nome || "—"}</div>
-    ),
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Nome
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => <div className="pl-4">{row.original.nome}</div>,
   },
+  // Coluna CPF/CNPJ
   {
     accessorKey: "cpf_cnpj",
-    header: () => <div className="text-left font-semibold">CPF / CNPJ</div>,
+    header: "CPF / CNPJ",
     cell: ({ row }) => (
-      <div className="text-left">
-        {formatarCpfCnpj(row.original.cpf_cnpj || "")}
-      </div>
+      <div>{formatarCpfCnpj(row.original.cpf_cnpj || "")}</div>
     ),
   },
+  // Coluna Telefone
   {
     accessorKey: "telefone",
-    header: () => <div className="text-left font-semibold">Telefone</div>,
+    header: "Telefone",
     cell: ({ row }) => (
-      <div className="text-left">
-        {formatarTelefone(row.original.telefone || "")}
-      </div>
+      <div>{formatarTelefone(row.original.telefone || "")}</div>
     ),
   },
+  // Coluna Endereço
   {
     accessorKey: "endereco",
-    header: () => <div className="text-left font-semibold">Endereço</div>,
-    cell: ({ row }) => (
-      <div className="text-left">{row.original.endereco || "—"}</div>
-    ),
+    header: "Endereço",
+    cell: ({ row }) => <div>{row.original.endereco || "—"}</div>,
   },
+  // Coluna Tipo (com ordenação)
   {
     accessorKey: "tipo_cliente",
-    header: () => <div className="text-left font-semibold">Tipo</div>,
-    cell: ({ row }) => (
-      <div className="text-left">{row.original.tipo_cliente}</div>
-    ),
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Tipo
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => <div>{row.original.tipo_cliente}</div>,
   },
+  // Coluna Total de Pedidos
   {
     accessorKey: "totalPedidos",
-    header: () => (
-      <div className="text-left font-semibold">Total de Pedidos</div>
-    ),
-    cell: ({ row }) => (
-      <div className="text-center">
-        {row.original.totalPedidos ?? 0}
-      </div>
-    ),
+    header: () => <div className="text-center">Total de Pedidos</div>,
+    cell: ({ row }) => <div className="text-center">{row.original.totalPedidos ?? 0}</div>,
   },
+  // Coluna de Ações
   {
     id: "actions",
-    header: () => <div className="text-right font-semibold">Ações</div>,
+    header: () => <div className="text-right">Ações</div>,
     cell: ({ row }) => (
       <div className="text-right">
         <CellActions cliente={row.original} />
