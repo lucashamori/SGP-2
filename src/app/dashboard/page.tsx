@@ -90,7 +90,7 @@ export default async function Page() {
                   <Users className="ml-auto w-4 h-4" />
                 </CardTitle>
                 <CardDescription>
-                  Lista de clientes cadastrados no sistema bora testar.
+                  Lista de clientes cadastrados no sistema.
                 </CardDescription>
               </CardHeader>
               <CardContent>
