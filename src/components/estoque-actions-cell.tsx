@@ -86,20 +86,16 @@ export function EstoqueActionsCell({ estoque }: { estoque: EstoqueData }) {
 
       <TooltipProvider delayDuration={100}>
         <div className="flex items-center justify-end gap-2">
-          {/* EDITAR */}
+          {/* EDIT */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsEditDialogOpen(true)}
-              >
+              <Button variant="ghost" size="icon" onClick={() => setIsEditDialogOpen(true)}>
                 <Pencil className="h-4 w-4" />
-                <span className="sr-only">Editar Estoque</span>
+                <span className="sr-only">Editar Cliente</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Editar Estoque</p>
+              <p>Editar Cliente</p>
             </TooltipContent>
           </Tooltip>
 
