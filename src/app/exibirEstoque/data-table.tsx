@@ -82,12 +82,12 @@ export function DataTable({ columns, data }: DataTableProps) {
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    // Lógica para obter o ID da linha, se a chave for fornecida
-    // (Esta parte é opcional se você não usa getRowId na versão avançada)
+    getRowId: (row) => row.id_estoque, // Usa a chave correta para identificar a linha
   });
 
   return (
     <div className="space-y-4">
+      {/* SEÇÃO DE FILTROS E CONTROLES */}
       <div className="flex items-center justify-between">
         <Input
           placeholder="Filtrar produtos..."
@@ -121,6 +121,7 @@ export function DataTable({ columns, data }: DataTableProps) {
                       column.toggleVisibility(!!value)
                     }
                   >
+                    {/* Exibe um nome mais amigável para a coluna */}
                     {column.id === "produto_descricao" ? "Produto" : 
                      column.id === "qtd_produto" ? "Qtd. em Estoque" :
                      column.id === "qtd_reservada" ? "Qtd. Reservada" :
@@ -133,21 +134,24 @@ export function DataTable({ columns, data }: DataTableProps) {
         </DropdownMenu>
       </div>
 
+      {/* A TABELA EM SI */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
             ))}
           </TableHeader>
@@ -159,7 +163,6 @@ export function DataTable({ columns, data }: DataTableProps) {
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    // CORREÇÃO: Adicionada classe de padding vertical (py-2) para diminuir a altura da linha
                     <TableCell key={cell.id} className="py-2">
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -183,6 +186,7 @@ export function DataTable({ columns, data }: DataTableProps) {
         </Table>
       </div>
 
+      {/* SEÇÃO DE PAGINAÇÃO */}
       <div className="flex items-center justify-between px-2">
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} de{" "}
