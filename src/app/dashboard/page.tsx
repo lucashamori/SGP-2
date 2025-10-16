@@ -90,12 +90,13 @@ export default async function Page() {
                   <Users className="ml-auto w-4 h-4" />
                 </CardTitle>
                 <CardDescription>
-                  Lista de clientes cadastrados no sistema.
+                  Lista de clientes cadastrados no sistema bora testar.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-base sm:text-lg font-bold">
                   {/* VALOR DINÂMICO DO BANCO */}
+                  
                   {totalClientes.toLocaleString("pt-BR")} clientes
                 </p>
               </CardContent>
