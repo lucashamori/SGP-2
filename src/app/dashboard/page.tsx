@@ -27,6 +27,7 @@ import { getClientesData } from "@/lib/data-actions"; // Importa a função para
 import {
   getTotalClientes,
   getValorTotalEstoque,
+  getTotalPedidos,
 } from "@/lib/dashboard-actions"; // Importa as funções para os cards
 
 // 1. Função de busca de dados para a TABELA
@@ -44,9 +45,10 @@ const formatCurrency = (value: number) => {
 // CORREÇÃO: A função Page foi marcada como 'async'
 export default async function Page() {
   // 2. Busca de todos os dados (tabela e cards) em paralelo para otimizar o carregamento.
-  const [data, totalClientes, valorTotalEstoque] = await Promise.all([
+  const [data, totalClientes, totalPedidos, valorTotalEstoque] = await Promise.all([
     getData(), // Tabela de clientes
-    getTotalClientes(), // Card Clientes (Contagem)
+    getTotalClientes(),
+    getTotalPedidos(), // Card Clientes (Contagem)
     getValorTotalEstoque(), // Card Produtos (Valor Total)
   ]);
   // NOTE: 'data' é o array de clientes para a tabela.
@@ -100,17 +102,19 @@ export default async function Page() {
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  Vendas
-                  <PackageOpen className="ml-auto w-4 h-4" />
-                </CardTitle>
-                <CardDescription>Vendas nos últimos 30 dias.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {/* Mantive este valor estático, pois não criamos a função de soma de vendas */}
-                <p className="text-base sm:text-lg font-bold">R$ 123.000.00</p>
-              </CardContent>
+                <CardHeader>
+                    <CardTitle className="flex items-center">
+                        Vendas
+                        <PackageOpen className="ml-auto w-4 h-4" />
+                    </CardTitle>
+                    <CardDescription>Total de Pedidos realizados no sistema.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {/* CORREÇÃO: Substitua o valor estático pelo dinâmico */}
+                    <p className="text-base sm:text-lg font-bold">
+                        {totalPedidos.toLocaleString("pt-BR")} pedidos
+                    </p>
+                </CardContent>
             </Card>
 
             <Card>
