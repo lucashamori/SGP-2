@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Package,
   Settings2,
+  Store,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -87,12 +88,12 @@ const data = {
       ],
     },
     {
-      title: "Empresas",
+      title: "Pedidos",
       url: "#",
-      icon: Package,
+      icon: Store,
       items: [
         {
-          title: "Empresas",
+          title: "Efetuar Pedido",
           url: "vendas",
         },
         
