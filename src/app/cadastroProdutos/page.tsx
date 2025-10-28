@@ -1,4 +1,4 @@
-import { Formulario, FormularioProduto } from "@/components/formularioProdutos"
+import { FormularioProduto } from "@/components/formularioProdutos"
 import ProtectedRoute from '@/context/protectedRoute';
 
 import { AppSidebar } from "@/components/app-sidebar"
