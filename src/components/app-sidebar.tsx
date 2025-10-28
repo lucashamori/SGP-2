@@ -5,13 +5,10 @@ import { auth } from "@/lib/firebase";
 import { useAuth } from "@/context/authContext";
 import * as React from "react"
 import {
-  
-  Factory,
   Users,
   GalleryVerticalEnd,
   LayoutDashboard,
   Package,
-  Settings2,
   Store,
 } from "lucide-react"
 
