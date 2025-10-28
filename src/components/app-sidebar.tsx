@@ -1,5 +1,8 @@
 "use client"
-
+import { useRouter } from "next/navigation";
+import { signOut } from "firebase/auth"; 
+import { auth } from "@/lib/firebase";
+import { useAuth } from "@/context/authContext";
 import * as React from "react"
 import {
   
@@ -103,7 +106,30 @@ const data = {
   
 }
 
+
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  
+  const { user } = useAuth();
+  const router = useRouter(); // Para a função de logout
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/"); // Redireciona para login após sair
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+      alert("Erro ao tentar sair.");
+    }
+  };
+
+    const userDataForNav = user ? {
+    name: user.displayName || user.email || "Usuário Anônimo", // Fallback se nome/email não existirem
+    email: user.email || "", // Pega o email real do Firebase
+    avatar: user.photoURL || "/avatar-placeholder.png", // Usa foto do Firebase ou placeholder (ajuste o caminho!)
+  } : null;
+  
+  
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -113,7 +139,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={userDataForNav} onLogout={handleLogout} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
