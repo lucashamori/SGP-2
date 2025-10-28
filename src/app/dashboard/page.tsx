@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar";
+import ProtectedRoute from '@/context/protectedRoute'; // Importe o protetor
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -56,6 +57,7 @@ export default async function Page() {
   // 'valorTotalEstoque' é a soma do valor dos produtos em estoque (ex: 12238.27).
 
   return (
+    <ProtectedRoute>
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
@@ -144,5 +146,6 @@ export default async function Page() {
         </div>
       </SidebarInset>
     </SidebarProvider>
+    </ProtectedRoute>
   );
 }

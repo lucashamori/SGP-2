@@ -1,3 +1,4 @@
+import ProtectedRoute from '@/context/protectedRoute';
 import { AppSidebar } from "@/components/app-sidebar";
 import {
   Breadcrumb,
@@ -26,6 +27,7 @@ export default async function PageExibirEstoque() {
   const data = response.success ? response.data : [];
 
   return (
+  <ProtectedRoute>
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
@@ -63,6 +65,7 @@ export default async function PageExibirEstoque() {
         </main>
       </SidebarInset>
     </SidebarProvider>
+  </ProtectedRoute>
   );
 }
 

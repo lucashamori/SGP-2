@@ -24,6 +24,7 @@ export default async function PageExibirClientes() {
   const data = await getClientesData();
 
   return (
+  
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
@@ -61,5 +62,6 @@ export default async function PageExibirClientes() {
         </main>
       </SidebarInset>
     </SidebarProvider>
+  
   );
 }

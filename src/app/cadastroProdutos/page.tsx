@@ -1,5 +1,5 @@
 import { Formulario, FormularioProduto } from "@/components/formularioProdutos"
-
+import ProtectedRoute from '@/context/protectedRoute';
 
 import { AppSidebar } from "@/components/app-sidebar"
 import {
@@ -19,6 +19,7 @@ import {
 
 export default function CadastrarProdutos() {
   return (
+    <ProtectedRoute>
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
@@ -51,6 +52,7 @@ export default function CadastrarProdutos() {
         </div>
       </SidebarInset>
     </SidebarProvider>
+    </ProtectedRoute>
       )
     }
     

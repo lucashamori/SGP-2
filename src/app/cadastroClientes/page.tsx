@@ -1,5 +1,5 @@
 import { Formulario } from "@/components/formularioClientes"
-
+import ProtectedRoute from '@/context/protectedRoute';
 
 import { AppSidebar } from "@/components/app-sidebar"
 import {
@@ -19,6 +19,7 @@ import {
 
 export default function CadastrarClientes() {
   return (
+    <ProtectedRoute>
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
@@ -51,6 +52,7 @@ export default function CadastrarClientes() {
         </div>
       </SidebarInset>
     </SidebarProvider>
+    </ProtectedRoute>
       )
     }
     

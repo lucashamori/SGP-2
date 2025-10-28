@@ -96,7 +96,7 @@ const data = {
           title: "Efetuar Pedido",
           url: "vendas",
         },
-        
+       
       ],
     },
   ],
