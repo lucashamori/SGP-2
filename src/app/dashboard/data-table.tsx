@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -82,7 +82,7 @@ export function DataTable({ columns, data }: DataTableProps) {
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    getRowId: (row) => row.id_cliente, // Usa a chave correta para identificar a linha
+    getRowId: (row) => row.nome, // Usa a chave correta para identificar a linha
   });
 
   return (
