@@ -1,8 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation"; // Importar useRouter
-import { signOut } from "firebase/auth"; // Importar signOut
-import { auth } from "@/lib/firebase"; // Importar auth
+// Removido useRouter, signOut, auth - A lógica de logout volta para o AppSidebar
 import {
   BadgeCheck,
   Bell,
@@ -28,37 +26,26 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-// Interface para as props do componente
+// CORREÇÃO: Readicionada a prop onLogout na interface
 interface NavUserProps {
   user: {
     name: string;
     email: string;
     avatar: string;
   } | null;
-  // REMOVIDO: onLogout não é mais necessário como prop
+  onLogout: () => void; // A função de logout é esperada como prop
 }
 
-export function NavUser({ user }: NavUserProps) {
+// CORREÇÃO: Recebendo onLogout via props
+export function NavUser({ user, onLogout }: NavUserProps) {
   const { isMobile } = useSidebar();
-  const router = useRouter(); // Hook para redirecionamento
 
   // Se não houver usuário, não renderiza nada
   if (!user) {
     return null;
   }
 
-  // NOVA: Função de logout movida para dentro do componente
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      // Redireciona para a página de login (raiz) após o logout
-      router.push("/");
-    } catch (error) {
-      console.error("Erro ao fazer logout:", error);
-      alert("Erro ao tentar sair. Tente novamente.");
-    }
-  };
-
+  // REMOVIDO: handleLogout interno não é mais necessário aqui
 
   return (
     <SidebarMenu>
@@ -125,8 +112,8 @@ export function NavUser({ user }: NavUserProps) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            {/* CORREÇÃO: onClick agora chama a função handleLogout interna */}
-            <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:bg-red-100 focus:text-red-700 dark:focus:bg-red-900/50 dark:focus:text-red-400">
+            {/* CORREÇÃO: onClick agora chama a prop onLogout recebida */}
+            <DropdownMenuItem onClick={onLogout} className="text-red-600 focus:bg-red-100 focus:text-red-700 dark:focus:bg-red-900/50 dark:focus:text-red-400">
               <LogOut className="mr-2 h-4 w-4" />
               <span>Sair</span>
             </DropdownMenuItem>
