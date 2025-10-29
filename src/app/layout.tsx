@@ -20,7 +20,7 @@ const inter = Inter({ // Added Inter font configuration
 });
 
 export const metadata: Metadata = {
-  title: "Sistema de Gerenciamento de Produtos",
+  title: "Sistema de Gerenciamento de Produtos (Teste)",
   description: "Sistema de Gerenciamento de Produtos",
 };
 
