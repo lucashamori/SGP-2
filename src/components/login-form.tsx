@@ -50,7 +50,7 @@ export function LoginForm({
   return (
     <form onSubmit={handleSubmit} className={cn("flex flex-col gap-6", className)} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Entre na sua conta</h1>
+        <h1 className="text-2xl font-bold">Sistema de Gerenciamento de Produtos</h1>
         <p className="text-muted-foreground text-sm text-balance">
           Entre com o seu email para acessar sua conta
         </p>
