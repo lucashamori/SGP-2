@@ -1,3 +1,4 @@
+import ProtectedRoute from '@/context/protectedRoute';
 import { AppSidebar } from "@/components/app-sidebar";
 import {
   Breadcrumb,
@@ -25,6 +26,7 @@ export default async function PageExibirClientes() {
 
   return (
   
+    <ProtectedRoute>
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
@@ -62,6 +64,6 @@ export default async function PageExibirClientes() {
         </main>
       </SidebarInset>
     </SidebarProvider>
-  
+  </ProtectedRoute> 
   );
 }
