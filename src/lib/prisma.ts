@@ -1,20 +1,13 @@
-// src/lib/prisma.ts
+import { PrismaClient } from "@prisma/client";
 
-import { PrismaClient } from '../generated/prisma'; // Use o caminho que você definiu
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
-// Cria uma única instância do Prisma Client
-// Isso é crucial para evitar que o Next.js crie novas instâncias a cada 'hot reload'
-const prismaClientSingleton = () => {
-  return new PrismaClient();
-};
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    log: ["query", "error", "warn"],
+  });
 
-type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>;
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClientSingleton | undefined;
-};
-
-// Usa a instância global em desenvolvimento (para hot reload) ou cria uma nova em produção
-export const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+export default prisma;
