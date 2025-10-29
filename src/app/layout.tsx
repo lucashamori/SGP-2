@@ -20,7 +20,7 @@ const inter = Inter({ // Added Inter font configuration
 });
 
 export const metadata: Metadata = {
-  title: "SGP",
+  title: "Sistema de Gerenciamento de Produtos",
   description: "Sistema de Gerenciamento de Produtos",
 };
 
