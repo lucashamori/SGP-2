@@ -33,7 +33,7 @@ export function Formulario({
   let inputId: string;
   let inputPlaceholder: string;
   let maxLength: number;
-  let tipoCliente: string;
+  let tipoCliente: "Pessoa Física" | "Pessoa Jurídica";
 
   if (documentType === "cpf") {
     // Valores para CPF (Pessoa Física)

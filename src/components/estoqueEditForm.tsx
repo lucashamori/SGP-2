@@ -1,17 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { getProdutos } from "@/actions/produto"; // busca produtos do banco
+
 
 export function EstoqueEditForm({
   estoque,
@@ -24,7 +17,7 @@ export function EstoqueEditForm({
   onCancel: () => void;
   isSubmitting: boolean;
 }) {
-  const [produtos, setProdutos] = useState<any[]>([]);
+  
   const [formData, setFormData] = useState({
     produto_id_produto: estoque.produto_id_produto || "",
     qtd_produto: estoque.qtd_produto || "",
@@ -32,15 +25,7 @@ export function EstoqueEditForm({
     valor_unitario: estoque.valor_unitario || "",
   });
 
-  useEffect(() => {
-    async function loadProdutos() {
-      const result = await getProdutos();
-      if (result.success) {
-        setProdutos(result.data);
-      }
-    }
-    loadProdutos();
-  }, []);
+ 
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

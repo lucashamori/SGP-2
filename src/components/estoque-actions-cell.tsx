@@ -29,10 +29,8 @@ export function EstoqueActionsCell({ estoque }: { estoque: EstoqueData }) {
     // Se sua server action updateEstoque aceita nome/valor, envie-os.
     // Caso o update seja dividido entre produto e estoque, adapte conforme sua action.
     const result = await updateEstoque(identifiers, {
-      nome: data.nome,
       qtd_produto: data.qtd_produto,
       qtd_reservada: data.qtd_reservada,
-      valor_unitario: data.valor_unitario,
     });
 
     if (result.success) {
@@ -91,11 +89,11 @@ export function EstoqueActionsCell({ estoque }: { estoque: EstoqueData }) {
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" onClick={() => setIsEditDialogOpen(true)}>
                 <Pencil className="h-4 w-4" />
-                <span className="sr-only">Editar Cliente</span>
+                <span className="sr-only">Editar Produto</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Editar Cliente</p>
+              <p>Editar Produto</p>
             </TooltipContent>
           </Tooltip>
 

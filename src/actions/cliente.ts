@@ -20,6 +20,8 @@ type CadastroData = {
   tipo_cliente: "Pessoa Física" | "Pessoa Jurídica";
 };
 
+type TipoCliente = "Pessoa Física" | "Pessoa Jurídica";
+
 type UpdateData = {
   nome: string;
   nome_reduzido?: string;

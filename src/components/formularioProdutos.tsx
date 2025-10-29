@@ -43,12 +43,19 @@ export function FormularioProduto({ className, ...props }: React.ComponentPropsW
         const res = await getUnidades();
         if (!mounted) return;
         if (res?.success) {
-          setUnidades(res.data || []);
-          if ((res.data || []).length > 0) {
-            setUnidade(String(res.data[0].id));
-          }
-        }
-      } catch (err) {
+    // 1. Crie uma variável para 'res.data' com um fallback (array vazio)
+    const unidadesData = res.data || [];
+    
+    // 2. Use a nova variável
+    setUnidades(unidadesData);
+
+    // 3. Verifique a nova variável (o TypeScript agora entende)
+    if (unidadesData.length > 0) {
+        // 4. Acesse o item com segurança
+        setUnidade(String(unidadesData[0].id));
+    }
+}
+} catch (err) {
         console.error("Erro ao chamar getUnidades:", err);
       } finally {
         if (mounted) setLoadingUnidades(false);

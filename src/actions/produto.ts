@@ -307,3 +307,29 @@ export async function getUnidades() {
   }
 }
 
+export async function getProdutos() {
+  try {
+    const produtos = await prisma.produto.findMany({
+      include: {
+        unidade_medida: true, // Inclui a descrição da unidade
+      },
+      orderBy: {
+        descricao: "asc",
+      },
+    });
+
+    // Serializa para o cliente (BigInt -> String)
+    const payload = produtos.map((p) => ({
+      id: String(p.id_produto),
+      descricao: p.descricao,
+      valor_unitario: String(p.valor_unitario),
+      unidade_id: String(p.unidade_medida_id_unidade_medida),
+      unidade_descricao: p.unidade_medida.descricao,
+    }));
+
+    return { success: true, data: payload };
+  } catch (error: any) {
+    console.error("[ACTION] ERRO getProdutos:", error);
+    return { success: false, message: "Erro ao buscar produtos." };
+  }
+}
