@@ -10,70 +10,85 @@ import { ClienteEditForm } from "./cliente-edit-form";
 import { ClienteData } from "@/app/exibirClientes/columns";
 import { useRouter } from "next/navigation";
 
+type UpdateData = {
+  nome: string;
+  nome_reduzido?: string; // string | undefined
+  cpf_cnpj: string;
+  endereco: string;
+  telefone: string;
+  tipo_cliente: "Pessoa Física" | "Pessoa Jurídica";
+};
+
+
 export function CellActions({ cliente }: { cliente: ClienteData }) {
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const router = useRouter();
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
-  // Observação: envie STRINGS (serializáveis). A action no servidor converte para BigInt.
-  const handleUpdate = async (data: ClienteData) => {
-    setIsSubmitting(true);
+  const handleUpdate = async (data: ClienteData) => {
+    setIsSubmitting(true);
 
-    const identifiers = {
-      id_cliente: String(data.id_cliente),
-      empresa_id_empresa: String(data.empresa_id_empresa),
-    };
+    // CORREÇÃO: Incluindo TODOS os campos da chave primária composta
+    const identifiers = {
+      id_cliente: String(data.id_cliente),
+      empresa_id_empresa: String(data.empresa_id_empresa),
+      tipo_cliente_id_tipo_cliente: String(data.tipo_cliente_id_tipo_cliente), // Campo adicionado
+    };
 
-    try {
-      const result = await updateCliente(identifiers, {
+    // Prepara o payload para a action, garantindo a compatibilidade de tipos
+    const payload: UpdateData = {
         nome: data.nome,
-        nome_reduzido: data.nome_reduzido,
+        // Converte null para undefined para nome_reduzido
+        nome_reduzido: data.nome_reduzido === null ? undefined : data.nome_reduzido,
         cpf_cnpj: String(data.cpf_cnpj ?? ""),
         endereco: data.endereco ?? "",
         telefone: String(data.telefone ?? ""),
         tipo_cliente: (data.tipo_cliente as "Pessoa Física" | "Pessoa Jurídica") ?? "Pessoa Física",
-      });
+    };
 
-      if (result.success) {
-        setIsEditDialogOpen(false);
-        // atualiza dados da página de forma suave
-        startTransition(() => router.refresh());
-      } else {
-        alert(`Erro ao atualizar: ${result.message}`);
-      }
-    } catch (err) {
-      console.error("Erro ao atualizar cliente:", err);
-      alert("Erro inesperado ao atualizar cliente.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    try {
+      // Envia os identifiers corretos (com 3 campos) e o payload para a action
+      const result = await updateCliente(identifiers, payload);
 
-  const handleDelete = async () => {
-    if (!window.confirm(`Tem certeza que deseja excluir o cliente "${cliente.nome}"?`)) return;
+      if (result.success) {
+        setIsEditDialogOpen(false);
+        startTransition(() => router.refresh());
+      } else {
+        alert(`Erro ao atualizar: ${result.message}`);
+      }
+    } catch (err) {
+      console.error("Erro ao atualizar cliente:", err);
+      alert("Erro inesperado ao atualizar cliente.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-    // chamar a server action em uma transition para melhor UX
-    startTransition(async () => {
-      try {
-        const result = await deleteCliente({
-          id_cliente: String(cliente.id_cliente),
-          empresa_id_empresa: String(cliente.empresa_id_empresa),
-        });
+  const handleDelete = async () => {
+    if (!window.confirm(`Tem certeza que deseja excluir o cliente "${cliente.nome}"?`)) return;
 
-        if (!result.success) {
-          alert(`Erro ao excluir: ${result.message}`);
-          return;
-        }
+    startTransition(async () => {
+      try {
+        // CORREÇÃO: Incluindo TODOS os campos da chave primária composta
+        const result = await deleteCliente({
+          id_cliente: String(cliente.id_cliente),
+          empresa_id_empresa: String(cliente.empresa_id_empresa),
+          tipo_cliente_id_tipo_cliente: String(cliente.tipo_cliente_id_tipo_cliente), // Campo adicionado
+        });
 
-        // sucesso: atualiza a página/componente
-        router.refresh();
-      } catch (err) {
-        console.error("Erro ao excluir cliente:", err);
-        alert("Erro inesperado ao excluir cliente.");
-      }
-    });
-  };
+        if (!result.success) {
+          alert(`Erro ao excluir: ${result.message}`);
+          return;
+        }
+        router.refresh();
+      } catch (err) {
+        console.error("Erro ao excluir cliente:", err);
+        alert("Erro inesperado ao excluir cliente.");
+      }
+    });
+  };
+
 
   return (
     <>
