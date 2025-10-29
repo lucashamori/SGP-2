@@ -8,16 +8,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CellActions } from "@/components/cliente-actions-cell";
 
 export type ClienteData = {
-  id_cliente: string;
-  empresa_id_empresa: string;
+  id_cliente: string;
+  empresa_id_empresa: string;
   tipo_cliente_id_tipo_cliente: string;
-  nome: string;
-  nome_reduzido: string;
-  cpf_cnpj: string;
-  telefone: string;
+  nome: string;
+  // CORREÇÃO: Permitir que nome_reduzido seja null
+  nome_reduzido: string | null;
+  cpf_cnpj: string;
+  telefone: string;
   endereco: string;
   tipo_cliente: string;
-  totalPedidos: number;
+  totalPedidos: number;
 };
 
 // Funções utilitárias mantidas para formatação
