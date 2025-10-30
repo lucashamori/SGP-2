@@ -91,10 +91,15 @@ const data = {
       title: "Pedidos",
       url: "#",
       icon: Store,
+      isActive: true,
       items: [
         {
           title: "Efetuar Pedido",
           url: "pedidos",
+        },
+        {
+          title: "Exibir Pedidos",
+          url: "exibirPedidos",
         },
        
       ],
