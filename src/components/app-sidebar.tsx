@@ -94,7 +94,7 @@ const data = {
       items: [
         {
           title: "Efetuar Pedido",
-          url: "vendas",
+          url: "pedidos",
         },
        
       ],
