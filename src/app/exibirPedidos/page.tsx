@@ -1,5 +1,5 @@
-// src/app/exibirEstoque/page.tsx
-
+import { getPedidosAgrupadosPorCliente } from "@/actions/pedido";
+import { PedidosTable } from "@/app/exibirPedidos/data-table";
 import ProtectedRoute from '@/context/protectedRoute';
 import { AppSidebar } from "@/components/app-sidebar";
 import {
@@ -19,26 +19,13 @@ import {
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-import { DataTable } from "./data-table"; // Usa a nova data-table local
-import { columns, EstoqueData } from "./columns"; // Importe o tipo EstoqueData
-import { getEstoqueFlat } from "@/actions/estoque"; // Action para buscar dados de estoque
+export const dynamic = "force-dynamic"; // garante atualização ao vivo no deploy (Vercel etc.)
 
-// CORREÇÃO: Garante que a função SEMPRE retorna EstoqueData[]
-async function getData(): Promise<EstoqueData[]> {
-  try {
-    const response = await getEstoqueFlat();
-    // Se a action foi bem-sucedida E retornou dados, use os dados. Senão, array vazio.
-    return response.success && response.data ? response.data : [];
-  } catch (error) {
-    console.error("Erro ao buscar dados de pedidos na página:", error);
-    return []; // Retorna array vazio em caso de erro na chamada da action
-  }
-}
-
-export default async function PageExibirPedidos() {
-  const data = await getData(); // Agora 'data' será sempre um array
-
-  return (
+export default async function ExibirPedidosPage() {
+  // Busca os dados do action
+  const result = await getPedidosAgrupadosPorCliente();
+  const data = result.success ? result.data : [];
+return (
     <ProtectedRoute>
       <SidebarProvider>
         <AppSidebar />
@@ -58,7 +45,7 @@ export default async function PageExibirPedidos() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Exibir Pedidos</BreadcrumbPage>
+                  <BreadcrumbPage>Exibir Estoque</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -67,13 +54,13 @@ export default async function PageExibirPedidos() {
           <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
             <div className="flex items-center justify-between">
               <h1 className="text-lg font-semibold md:text-2xl">Estoque</h1>
-              <Link href="/pedidos"> {/* Verifique a URL correta */}
-                <Button>Efetuar Novo Pedido</Button>
+              <Link href="/cadastroProdutos"> {/* Verifique a URL correta */}
+                <Button>Cadastrar Novo Produto</Button>
               </Link>
             </div>
 
-            {/* A DataTable agora recebe um array garantido */}
-            <DataTable columns={columns} data={data} />
+            {/* Tabela principal */}
+            <PedidosTable data={data} />
 
           </main>
         </SidebarInset>
