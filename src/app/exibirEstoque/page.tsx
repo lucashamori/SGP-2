@@ -67,13 +67,13 @@ export default async function PageExibirEstoque() {
           <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
             <div className="flex items-center justify-between">
               <h1 className="text-lg font-semibold md:text-2xl">Estoque</h1>
-              <Link href="/cadastroProdutos"> {/* Verifique a URL correta */}
-                <Button>Cadastrar Novo Produto</Button>
-              </Link>
+              
             </div>
 
-            {/* A DataTable agora recebe um array garantido */}
+            <div className="container mx-auto py-4 px-0">
+              
             <DataTable columns={columns} data={data} />
+            </div>
 
           </main>
         </SidebarInset>

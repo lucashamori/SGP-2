@@ -1,6 +1,7 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
+import { getPedidosAgrupadosPorCliente } from "@/actions/pedido"; 
 
 // Mapeamento reverso para converter o ID do tipo de cliente de volta para texto
 const CLIENTE_TYPE_TEXT_MAP: { [key: number]: string } = {
@@ -42,6 +43,31 @@ export async function getClientesData() {
     }));
   } catch (error) {
     console.error("ERRO AO BUSCAR DADOS DE CLIENTES:", error);
+    return [];
+  }
+}
+
+// ajuste o caminho conforme a localização real
+
+export async function getPedidosData() {
+  try {
+    const response = await getPedidosAgrupadosPorCliente();
+
+    if (!response.success) {
+      console.error("[ACTION] getPedidosData:", response.message);
+      return [];
+    }
+
+    // Retorna apenas o array de dados no formato esperado pela tabela
+    return response.data.map((pedido) => ({
+      cliente_nome: pedido.cliente_nome,
+      qtd_pedidos: pedido.qtd_pedidos,
+      valor_total: pedido.valor_total,
+      tipo_cliente: pedido.tipo_cliente,
+      endereco: pedido.endereco,
+    }));
+  } catch (error: any) {
+    console.error("[ACTION] getPedidosData error:", error);
     return [];
   }
 }

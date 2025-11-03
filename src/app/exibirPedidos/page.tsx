@@ -1,6 +1,6 @@
-import { getPedidosAgrupadosPorCliente } from "@/actions/pedido";
-import { PedidosTable } from "@/app/exibirPedidos/data-table";
-import ProtectedRoute from '@/context/protectedRoute';
+import ProtectedRoute from "@/context/protectedRoute";
+import { getPedidosData } from "@/lib/data-actions";
+
 import { AppSidebar } from "@/components/app-sidebar";
 import {
   Breadcrumb,
@@ -19,13 +19,15 @@ import {
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export const dynamic = "force-dynamic"; // garante atualização ao vivo no deploy (Vercel etc.)
+import { DataTable } from "./data-table";
+import { columns } from "./columns";
+ // você criará este action
 
-export default async function ExibirPedidosPage() {
-  // Busca os dados do action
-  const result = await getPedidosAgrupadosPorCliente();
-  const data = result.success ? result.data : [];
-return (
+export default async function PageExibirPedidos() {
+  const data = await getPedidosData();
+  
+
+  return (
     <ProtectedRoute>
       <SidebarProvider>
         <AppSidebar />
@@ -45,7 +47,7 @@ return (
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Exibir Estoque</BreadcrumbPage>
+                  <BreadcrumbPage>Exibir Pedidos</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -53,15 +55,13 @@ return (
 
           <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
             <div className="flex items-center justify-between">
-              <h1 className="text-lg font-semibold md:text-2xl">Estoque</h1>
-              <Link href="/cadastroProdutos"> {/* Verifique a URL correta */}
-                <Button>Cadastrar Novo Produto</Button>
-              </Link>
+              <h1 className="text-lg font-semibold md:text-2xl">Pedidos por cliente</h1>
+             
             </div>
 
-            {/* Tabela principal */}
-            <PedidosTable data={data} />
-
+            <div className="container mx-auto py-4 px-0">
+              <DataTable columns={columns} data={data} />
+            </div>
           </main>
         </SidebarInset>
       </SidebarProvider>

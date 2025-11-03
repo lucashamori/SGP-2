@@ -59,8 +59,10 @@ export default async function PageExibirClientes() {
             </Link>
           </div>
           
+          <div className="container mx-auto py-4 px-0">
           <DataTable columns={columns} data={data} />
-          
+          </div>
+
         </main>
       </SidebarInset>
     </SidebarProvider>
