@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import ProtectedRoute from "@/context/protectedRoute";
 import { getPedidosData } from "@/lib/data-actions";
 
@@ -16,8 +17,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+
 
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
