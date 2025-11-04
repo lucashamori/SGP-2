@@ -157,10 +157,14 @@ O **SGP-2** foi desenvolvido como parte de um projeto prático do **SENAC**, com
 - Importância da documentação e versionamento em projetos de equipe.
 
 ---
+## 🧑‍💻 Autor
 
 **👤 Lucas Mori**  
 Estudante do **SENAC**, com foco em **Ciência de Dados e Desenvolvimento Web**.  
 Apaixonado por criar soluções completas, integrando banco de dados, lógica de negócio e interfaces modernas.
+
+📎 [GitHub](https://github.com/lucashamori)  
+📧 Contato: (lucashamori@gmail.com)
 
 ---
 
