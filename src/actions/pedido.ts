@@ -4,13 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 /* =====================================================
- * Função utilitária: serialização segura de objetos Prisma
+ * Função utilitária: serialização segura (BigInt, Decimal)
  * ===================================================== */
 function serializePrisma(data: any) {
   return JSON.parse(
     JSON.stringify(data, (key, value) => {
-      if (value?.constructor?.name === "Decimal") return Number(value);
       if (typeof value === "bigint") return Number(value);
+      if (value?.constructor?.name === "Decimal") return Number(value);
       return value;
     })
   );
@@ -81,7 +81,7 @@ export async function getProdutos() {
 }
 
 /* =====================================================
- * Função: cadastrarPedido (corrigida com serialização segura)
+ * Função: cadastrarPedido (corrigida e com logs)
  * ===================================================== */
 type PedidoPayload = {
   cliente_id_cliente: string;
@@ -106,14 +106,15 @@ export async function cadastrarPedido(payload: PedidoPayload) {
         empresa_id_empresa,
       } = payload;
 
-      const prodIdBigInt = BigInt(produto_id_produto);
-      const unidIdBigInt = BigInt(produto_unidade_medida_id_unidade_medida);
-      const empIdBigInt = BigInt(empresa_id_empresa);
+      const prodId = BigInt(produto_id_produto);
+      const unidId = BigInt(produto_unidade_medida_id_unidade_medida);
+      const empId = BigInt(empresa_id_empresa);
 
+      // 🔍 Buscar estoque
       const estoqueAtual = await tx.estoque.findFirst({
         where: {
-          produto_id_produto: prodIdBigInt,
-          produto_unidade_medida_id_unidade_medida: unidIdBigInt,
+          produto_id_produto: prodId,
+          produto_unidade_medida_id_unidade_medida: unidId,
         },
         select: {
           id_estoque: true,
@@ -122,6 +123,7 @@ export async function cadastrarPedido(payload: PedidoPayload) {
       });
 
       if (!estoqueAtual) {
+        console.error("[ERRO] Estoque não encontrado para o produto:", prodId);
         throw new Error("Item de estoque não encontrado para este produto.");
       }
 
@@ -130,23 +132,21 @@ export async function cadastrarPedido(payload: PedidoPayload) {
         throw new Error(`Estoque insuficiente. Disponível: ${qtdDisponivel}`);
       }
 
-      // Atualiza estoque
+      // 🧾 Atualizar estoque
+      console.log(
+        `[ACTION] Atualizando estoque ID ${estoqueAtual.id_estoque}: -${qtd_comprada_item}`
+      );
+
       await tx.estoque.update({
-        where: {
-          id_estoque_produto_id_produto_produto_unidade_medida_id_unidade_medida: {
-            id_estoque: estoqueAtual.id_estoque,
-            produto_id_produto: prodIdBigInt,
-            produto_unidade_medida_id_unidade_medida: unidIdBigInt,
-          },
-        },
+        where: { id_estoque: estoqueAtual.id_estoque },
         data: {
-          qtd_produto: { decrement: qtd_comprada_item },
+          qtd_produto: qtdDisponivel - qtd_comprada_item,
           Usuario_Alteracao: "SYSTEM_PEDIDO",
           Data_Hora_Alteracao: new Date(),
         },
       });
 
-      // Cria pedido
+      // 🧾 Criar pedido
       const newPedidoId = BigInt(Date.now());
       const dataForPrisma = {
         id_pedido: newPedidoId,
@@ -154,27 +154,24 @@ export async function cadastrarPedido(payload: PedidoPayload) {
         data_pedido: new Date(),
         qtd_comprada_item: payload.qtd_comprada_item,
         valor_total_item: payload.valor_total_item,
-
         cliente_id_cliente: BigInt(payload.cliente_id_cliente),
         cliente_empresa_id_empresa: BigInt(payload.cliente_empresa_id_empresa),
         cliente_tipo_cliente_id_tipo_cliente: BigInt(
           payload.cliente_tipo_cliente_id_tipo_cliente
         ),
-
-        produto_id_produto: prodIdBigInt,
-        produto_unidade_medida_id_unidade_medida: unidIdBigInt,
-
-        empresa_id_empresa: empIdBigInt,
+        produto_id_produto: prodId,
+        produto_unidade_medida_id_unidade_medida: unidId,
+        empresa_id_empresa: empId,
       };
 
       const novoPedido = await tx.pedido.create({ data: dataForPrisma });
+      console.log("[ACTION] Pedido criado com sucesso:", novoPedido.id_pedido);
+
       return novoPedido;
     });
 
-    // 🔧 Corrige erro de serialização Decimal → número simples
     const pedidoSerializado = serializePrisma(pedidoItem);
 
-    // Atualiza cache
     revalidatePath("/pedidos");
     revalidatePath("/dashboard");
 
@@ -184,7 +181,7 @@ export async function cadastrarPedido(payload: PedidoPayload) {
       data: pedidoSerializado,
     };
   } catch (error: any) {
-    console.error("[ACTION] cadastrarPedido:", error);
+    console.error("[ACTION] cadastrarPedido ERRO:", error);
     return {
       success: false,
       message: `Erro ao cadastrar pedido: ${error.message}`,
