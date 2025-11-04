@@ -82,7 +82,7 @@ O esquema do banco de dados (PostgreSQL) é o núcleo do desafio, desenhado com 
 A complexidade das Chaves Primárias Compostas, especialmente em produto (7 colunas) e pedido (13 colunas), foi o principal vetor de aprendizado, exigindo um design de backend muito mais robusto do que um CRUD padrão.
 > 
 
-## 4. 💻 Arquitetura e Tecnologias Aplicadas
+## 💻 Arquitetura e Tecnologias Aplicadas
 
 A seleção da stack foi uma decisão deliberada para resolver os desafios de performance e complexidade de dados.
 
