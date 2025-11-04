@@ -81,7 +81,7 @@ export async function getProdutos() {
 }
 
 /* =====================================================
- * Função: cadastrarPedido (corrigida e com logs)
+ * Função: cadastrarPedido (corrigida e funcional)
  * ===================================================== */
 type PedidoPayload = {
   cliente_id_cliente: string;
@@ -119,11 +119,12 @@ export async function cadastrarPedido(payload: PedidoPayload) {
         select: {
           id_estoque: true,
           qtd_produto: true,
+          produto_id_produto: true,
+          produto_unidade_medida_id_unidade_medida: true,
         },
       });
 
       if (!estoqueAtual) {
-        console.error("[ERRO] Estoque não encontrado para o produto:", prodId);
         throw new Error("Item de estoque não encontrado para este produto.");
       }
 
@@ -138,7 +139,15 @@ export async function cadastrarPedido(payload: PedidoPayload) {
       );
 
       await tx.estoque.update({
-        where: { id_estoque: estoqueAtual.id_estoque },
+        where: {
+          id_estoque_produto_id_produto_produto_unidade_medida_id_unidade_medida:
+            {
+              id_estoque: estoqueAtual.id_estoque,
+              produto_id_produto: estoqueAtual.produto_id_produto,
+              produto_unidade_medida_id_unidade_medida:
+                estoqueAtual.produto_unidade_medida_id_unidade_medida,
+            },
+        },
         data: {
           qtd_produto: qtdDisponivel - qtd_comprada_item,
           Usuario_Alteracao: "SYSTEM_PEDIDO",
