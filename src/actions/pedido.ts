@@ -135,21 +135,18 @@ export async function cadastrarPedido(payload: PedidoPayload) {
 
       // 🧾 Atualizar estoque
       console.log(
-        `[ACTION] Atualizando estoque ID ${estoqueAtual.id_estoque}: -${qtd_comprada_item}`
+        `[ACTION] Atualizando estoque do produto ${produto_id_produto}: -${qtd_comprada_item}`
       );
 
-      await tx.estoque.update({
+      await tx.estoque.updateMany({
         where: {
-          id_estoque_produto_id_produto_produto_unidade_medida_id_unidade_medida:
-            {
-              id_estoque: estoqueAtual.id_estoque,
-              produto_id_produto: estoqueAtual.produto_id_produto,
-              produto_unidade_medida_id_unidade_medida:
-                estoqueAtual.produto_unidade_medida_id_unidade_medida,
-            },
+          produto_id_produto: prodId,
+          produto_unidade_medida_id_unidade_medida: unidId,
         },
         data: {
-          qtd_produto: qtdDisponivel - qtd_comprada_item,
+          qtd_produto: {
+            decrement: qtd_comprada_item, // diminui do estoque
+          },
           Usuario_Alteracao: "SYSTEM_PEDIDO",
           Data_Hora_Alteracao: new Date(),
         },
@@ -162,7 +159,7 @@ export async function cadastrarPedido(payload: PedidoPayload) {
         numero_pedido: newPedidoId,
         data_pedido: new Date(),
         qtd_comprada_item: payload.qtd_comprada_item,
-        valor_total_item: payload.valor_total_item,
+        valor_total_item: Number(payload.valor_total_item),
         cliente_id_cliente: BigInt(payload.cliente_id_cliente),
         cliente_empresa_id_empresa: BigInt(payload.cliente_empresa_id_empresa),
         cliente_tipo_cliente_id_tipo_cliente: BigInt(
