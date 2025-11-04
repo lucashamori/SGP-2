@@ -16,8 +16,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+
 
 import { DataTable } from "./data-table"; // Usa a nova data-table local
 import { columns, EstoqueData } from "./columns"; // Importe o tipo EstoqueData

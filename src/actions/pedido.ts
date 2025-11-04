@@ -180,6 +180,7 @@ export async function cadastrarPedido(payload: PedidoPayload) {
 
     revalidatePath("/pedidos");
     revalidatePath("/dashboard");
+    revalidatePath("/exibirEstoque");
 
     return {
       success: true,
