@@ -107,7 +107,7 @@ export default async function Page() {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center">
-                        Vendas
+                        Pedidos
                         <PackageOpen className="ml-auto w-4 h-4" />
                     </CardTitle>
                     <CardDescription>Total de Pedidos realizados no sistema.</CardDescription>
