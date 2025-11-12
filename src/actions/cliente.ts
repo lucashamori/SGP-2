@@ -164,27 +164,24 @@ export async function deleteCliente(
       whereClause.tipo_cliente_id_tipo_cliente = tipo_cliente_id_tipo_cliente;
     }
 
-    const deleteResult = await prisma.cliente.deleteMany({
+    // 🔹 Exclusão lógica (em vez de deleteMany)
+    const deleteResult = await prisma.cliente.updateMany({
       where: whereClause,
+      data: { ativo: false },
     });
 
     if (deleteResult.count === 0) {
-      return { success: false, message: "Registro não encontrado para excluir." };
+      return { success: false, message: "Registro não encontrado para exclusão lógica." };
     }
 
     revalidatePath("/exibirClientes");
-    return { success: true, message: "Cliente excluído com sucesso." };
+    return { success: true, message: "Cliente desativado com sucesso (exclusão lógica)." };
   } catch (error: any) {
-    console.error("ERRO DETALHADO DO PRISMA (DELETAR):", error);
-    if (error?.code === "P2003") {
-      return { success: false, message: "Não foi possível excluir: há registros dependentes (restrição de integridade)." };
-    }
-    if (error?.code === "P2025") {
-      return { success: false, message: "Registro não encontrado para excluir." };
-    }
-    return { success: false, message: "Erro na base de dados ao excluir." };
+    console.error("ERRO DETALHADO DO PRISMA (EXCLUSÃO LÓGICA):", error);
+    return { success: false, message: "Erro na base de dados ao desativar cliente." };
   }
 }
+
 
 /**
  * Cadastrar cliente (mesma validação CPF/CNPJ aplicada)

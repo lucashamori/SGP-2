@@ -23,6 +23,8 @@ import { getClientesData } from "@/lib/data-actions";
 
 export default async function PageExibirClientes() {
   const data = await getClientesData();
+  const clientes = await prisma.cliente.findMany();
+
 
   return (
   

@@ -2,14 +2,15 @@
 
 import { prisma } from "@/lib/prisma";
 import { getPedidosAgrupadosPorCliente } from "@/actions/pedido";
+import { boolean } from "zod";
 
-// Mapeamento reverso para converter o ID do tipo de cliente de volta para texto
-const CLIENTE_TYPE_TEXT_MAP: { [key: number]: string } = {
+// 🔹 Mapeamento do tipo de cliente
+const CLIENTE_TYPE_TEXT_MAP: Record<number, string> = {
   10001: "Pessoa Física",
   10002: "Pessoa Jurídica",
 };
 
-// Definição dos tipos
+// 🔹 Tipos
 type ClienteData = {
   id_cliente: string;
   empresa_id_empresa: string;
@@ -31,6 +32,7 @@ type PedidoAgrupado = {
   endereco: string;
 };
 
+// 🔹 Busca clientes ativos e seus pedidos
 export async function getClientesData(): Promise<ClienteData[]> {
   try {
     const clientes = await prisma.cliente.findMany({
@@ -43,32 +45,34 @@ export async function getClientesData(): Promise<ClienteData[]> {
         cpf_cnpj: true,
         telefone: true,
         endereco: true,
-        tipoClienteIdFK: true,
+        ativo: true, // ✅ correto
         pedido: { select: { id_pedido: true } },
       },
+      where: { ativo: true },
       orderBy: { nome: "asc" },
     });
 
-    // Converte BigInts para string e monta o objeto final
     return clientes.map((cliente) => ({
-      id_cliente: cliente.id_cliente.toString(),
-      empresa_id_empresa: cliente.empresa_id_empresa.toString(),
-      tipo_cliente_id_tipo_cliente: cliente.tipo_cliente_id_tipo_cliente.toString(),
+      id_cliente: String(cliente.id_cliente),
+      empresa_id_empresa: String(cliente.empresa_id_empresa),
+      tipo_cliente_id_tipo_cliente: String(cliente.tipo_cliente_id_tipo_cliente),
       nome: cliente.nome,
       nome_reduzido: cliente.nome_reduzido,
-      cpf_cnpj: cliente.cpf_cnpj.toString(),
-      telefone: cliente.telefone.toString(),
+      cpf_cnpj: String(cliente.cpf_cnpj),
+      telefone: String(cliente.telefone),
       endereco: cliente.endereco,
       tipo_cliente:
-        CLIENTE_TYPE_TEXT_MAP[Number(cliente.tipoClienteIdFK)] || "Indefinido",
+        CLIENTE_TYPE_TEXT_MAP[Number(cliente.tipo_cliente_id_tipo_cliente)] ||
+        "Indefinido",
       totalPedidos: cliente.pedido.length,
     }));
   } catch (error) {
-    console.error("ERRO AO BUSCAR DADOS DE CLIENTES:", error);
+    console.error("❌ ERRO AO BUSCAR DADOS DE CLIENTES:", error);
     return [];
   }
 }
 
+// 🔹 Busca pedidos agrupados por cliente
 export async function getPedidosData(): Promise<PedidoAgrupado[]> {
   try {
     const response = await getPedidosAgrupadosPorCliente();
@@ -78,7 +82,6 @@ export async function getPedidosData(): Promise<PedidoAgrupado[]> {
       return [];
     }
 
-    // Retorna apenas o array de dados no formato esperado pela tabela
     return response.data.map((pedido: PedidoAgrupado) => ({
       cliente_nome: pedido.cliente_nome,
       qtd_pedidos: pedido.qtd_pedidos,
@@ -86,7 +89,7 @@ export async function getPedidosData(): Promise<PedidoAgrupado[]> {
       tipo_cliente: pedido.tipo_cliente,
       endereco: pedido.endereco,
     }));
-  } catch (error: any) {
+  } catch (error) {
     console.error("[ACTION] getPedidosData error:", error);
     return [];
   }
